@@ -3,7 +3,7 @@ class Havm < Formula
   homepage "https://github.com/IngmarStein/havm"
   version "0.1.0"
   url "https://github.com/IngmarStein/havm/releases/download/v#{version}/havm.zip"
-  sha256 "2eba8e4bdc3336b559ae4c0940927d71752a2633ac8bbc5422b23e060bd66132"
+  sha256 "552e946697b777f874b8402feeee4f2d5bd3c7a9ce59b18700e3fcd1487889d2"
   license "MIT"
 
   depends_on macos: :golden_gate
@@ -12,10 +12,33 @@ class Havm < Formula
   def install
     libexec.install "Havm.app"
     bin.install_symlink libexec/"Havm.app/Contents/MacOS/havm" => "havm"
+
+    (etc/"havm").mkpath
+    (etc/"havm/config.yml").write <<~YAML
+      # havm configuration — all fields optional, uncomment to customize.
+      #
+      # vm:
+      #   cpu_count: 4
+      #   memory_size: "4 GiB"
+      #   disk_size: "32 GiB"
+      #
+      # network:
+      #   type: nat
+      #
+      # ssh:
+      #   authorized_keys: "~/.ssh/id_ed25519.pub"
+      #
+      # logging:
+      #   format: text
+      #   level: info
+      #
+      # shutdown:
+      #   timeout_seconds: 30
+    YAML
   end
 
   service do
-    run [opt_bin/"havm", "run", "--data-dir", var/"lib/havm"]
+    run [opt_bin/"havm", "run", "-c", etc/"havm/config.yml", "--data-dir", var/"lib/havm"]
     keep_alive true
     run_type :immediate
     working_dir var/"lib/havm"
@@ -28,8 +51,8 @@ class Havm < Formula
     <<~EOS
       Downloads and sets up Home Assistant OS automatically on first run.
 
-      Data: #{var}/lib/havm/
-      Config (optional): ~/.config/havm/config.yml
+      Config: #{etc}/havm/config.yml
+      Data:   #{var}/lib/havm/
     EOS
   end
 
