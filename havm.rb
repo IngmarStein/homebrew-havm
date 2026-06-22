@@ -12,29 +12,6 @@ class Havm < Formula
   def install
     libexec.install "Havm.app"
     bin.install_symlink libexec/"Havm.app/Contents/MacOS/havm" => "havm"
-
-    (etc/"havm").mkpath
-    (etc/"havm/config.yml").write <<~YAML
-      # havm configuration — all fields optional, uncomment to customize.
-      #
-      # vm:
-      #   cpu_count: 4
-      #   memory_size: "4 GiB"
-      #   disk_size: "32 GiB"
-      #
-      # network:
-      #   type: nat
-      #
-      # ssh:
-      #   authorized_keys: "~/.ssh/id_ed25519.pub"
-      #
-      # logging:
-      #   format: text
-      #   level: info
-      #
-      # shutdown:
-      #   timeout_seconds: 30
-    YAML
   end
 
   service do
@@ -51,8 +28,8 @@ class Havm < Formula
     <<~EOS
       Downloads and sets up Home Assistant OS automatically on first run.
 
-      Config: #{etc}/havm/config.yml
-      Data:   #{var}/lib/havm/
+      Data: #{var}/lib/havm/
+      Optional config: #{etc}/havm/config.yml
     EOS
   end
 
