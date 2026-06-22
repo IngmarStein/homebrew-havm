@@ -20,7 +20,7 @@ class Havm < Formula
     run_type :immediate
     working_dir var/"lib/havm"
     log_path var/"log/havm.log"
-    error_log_path var/"log/havm-error.log"
+    error_log_path var/"log/havm.log"
     environment_variables PATH: std_service_path_env
   end
 
