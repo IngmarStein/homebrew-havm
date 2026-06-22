@@ -1,24 +1,43 @@
 class Havm < Formula
   desc "Zero-config Home Assistant OS VM runner for Apple Silicon"
   homepage "https://github.com/IngmarStein/havm"
-  url "https://github.com/IngmarStein/havm/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "REPLACE_WITH_ACTUAL_SHA256"
+  version "0.1.0"
+  url "https://github.com/IngmarStein/havm/releases/download/v#{version}/havm.zip"
+  sha256 "7c2c04234370050972bdb6b57b0d2387963dfe476c01a0a7b34a012739d01174"
   license "MIT"
-  head "https://github.com/IngmarStein/havm.git", branch: "main"
 
-  depends_on macos: :golden_gate  # macOS 27+ with Apple Silicon
+  depends_on macos: :golden_gate
   depends_on arch: :arm64
-  depends_on xcode: ["17.0", :build]
-  uses_from_macos "swift"
 
   def install
-    system "swift", "build", "--disable-sandbox",
-           "--configuration", "release",
-           "--product", "havm"
-    bin.install ".build/release/havm"
+    libexec.install "Havm.app"
+    bin.install_symlink libexec/"Havm.app/Contents/MacOS/havm"
 
-    # Install example config to Homebrew's etc directory
-    (etc/"havm").install "share/examples/config.yml" => "config.yml"
+    (etc/"havm").mkpath
+    (etc/"havm/config.yml").write <<~YAML
+      # havm configuration — all fields optional, havm works with zero config.
+      #
+      # vm:
+      #   cpu_count: 4
+      #   memory_size: "4 GiB"
+      #   disk_size: "32 GiB"
+      #
+      # network:
+      #   type: nat                  # nat (default) or bridge
+      #
+      # haos:
+      #   release_channel: stable    # stable (default) or pre-release
+      #
+      # ssh:
+      #   authorized_keys: "~/.ssh/id_ed25519.pub"
+      #
+      # logging:
+      #   format: text               # text (default) or json
+      #   level: info                # debug, info (default), warning, error
+      #
+      # shutdown:
+      #   timeout_seconds: 30
+    YAML
   end
 
   service do
@@ -36,13 +55,13 @@ class Havm < Formula
       havm will automatically download and set up Home Assistant OS on first run.
 
       Quick start:
-        havm run                    # Start VM — auto-downloads HA OS on first run
-        havm run -c #{etc}/havm/config.yml  # Use the installed config
+        havm run                                    # Run with defaults
+        havm run --config #{etc}/havm/config.yml    # Use the installed config
 
       Background service:
         brew services start havm    # Runs with #{etc}/havm/config.yml
 
-      User config: ~/.config/havm/config.yml
+      User config: ~/.config/havm/config.yml (overrides #{etc}/havm/config.yml)
       Data:        ~/Library/Application Support/havm/
 
       Requires macOS 27 (Golden Gate) with Apple Silicon.
