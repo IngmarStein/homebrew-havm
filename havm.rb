@@ -3,17 +3,15 @@ class Havm < Formula
   homepage "https://github.com/IngmarStein/havm"
   version "0.1.0"
   url "https://github.com/IngmarStein/havm/releases/download/v#{version}/havm.zip"
-  sha256 "7c2c04234370050972bdb6b57b0d2387963dfe476c01a0a7b34a012739d01174"
+  sha256 "1db584527f8ac88e35a43b88e3411b1ab7a1311ef5841e26a70c5486172f59ce"
   license "MIT"
 
   depends_on macos: :golden_gate
   depends_on arch: :arm64
 
   def install
-    system "pwd"
-    system "ls", "-laR"
     libexec.install "Havm.app"
-    bin.install_symlink libexec/"Havm.app/Contents/MacOS/havm"
+    bin.install_symlink libexec/"Havm.app/Contents/MacOS/havm" => "havm"
 
     (etc/"havm").mkpath
     (etc/"havm/config.yml").write <<~YAML
