@@ -10,6 +10,8 @@ class Havm < Formula
   depends_on arch: :arm64
 
   def install
+    system "pwd"
+    system "ls", "-laR"
     libexec.install "Havm.app"
     bin.install_symlink libexec/"Havm.app/Contents/MacOS/havm"
 
