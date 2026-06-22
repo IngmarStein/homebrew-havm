@@ -24,6 +24,13 @@ class Havm < Formula
     environment_variables PATH: std_service_path_env
   end
 
+  def post_install
+    plist = launchd_service_path
+    return unless plist.exist?
+
+    safe_system "plutil", "-replace", "ExitTimeout", "-integer", "120", plist.to_s
+  end
+
   def caveats
     <<~EOS
       Downloads and sets up Home Assistant OS automatically on first run.
