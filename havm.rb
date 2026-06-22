@@ -52,19 +52,11 @@ class Havm < Formula
 
   def caveats
     <<~EOS
-      havm will automatically download and set up Home Assistant OS on first run.
+      Downloads and sets up Home Assistant OS automatically on first run.
 
-      Quick start:
-        havm run                                    # Run with defaults
-        havm run --config #{etc}/havm/config.yml    # Use the installed config
-
-      Background service:
-        brew services start havm    # Runs with #{etc}/havm/config.yml
-
-      User config: ~/.config/havm/config.yml (overrides #{etc}/havm/config.yml)
-      Data:        ~/Library/Application Support/havm/
-
-      Requires macOS 27 (Golden Gate) with Apple Silicon.
+      Config: #{etc}/havm/config.yml
+      User override: ~/.config/havm/config.yml
+      Data: ~/Library/Application Support/havm/
     EOS
   end
 
