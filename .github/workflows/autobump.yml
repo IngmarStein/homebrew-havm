@@ -1,0 +1,94 @@
+name: Autobump
+
+on:
+  schedule:
+    # Every 3 hours
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autobump:
+    runs-on: macos-latest
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up git
+        uses: Homebrew/actions/git-user-config@main
+
+      - name: Check for outdated formulae
+        id: livecheck
+        run: |
+          brew livecheck --tap IngmarStein/havm --json > /tmp/livecheck.json
+          outdated=$(jq -c '[.[] | select(.version.outdated == true)]' /tmp/livecheck.json)
+          echo "$outdated" > /tmp/outdated.json
+          count=$(echo "$outdated" | jq length)
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+          if [ "$count" -eq 0 ]; then
+            echo "All formulae are up to date"
+          else
+            jq -r '.[] | "\(.formula): \(.version.current) → \(.version.latest)"' /tmp/outdated.json
+          fi
+
+      - name: Bump outdated formulae
+        if: steps.livecheck.outputs.count != '0'
+        working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GH_TOKEN uses a PAT so the created PR triggers CI workflows.
+          # GITHUB_TOKEN would work but suppresses downstream pull_request events.
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          count=$(jq length /tmp/outdated.json)
+          for i in $(seq 0 $((count - 1))); do
+            formula=$(jq -r ".[$i].formula" /tmp/outdated.json)
+            current=$(jq -r ".[$i].version.current" /tmp/outdated.json)
+            latest=$(jq -r ".[$i].version.latest" /tmp/outdated.json)
+            name=$(echo "$formula" | awk -F/ '{print $NF}')
+            branch="autobump/${name}-${latest}"
+
+            echo "::group::${name} ${current} → ${latest}"
+
+            # Skip if PR already exists for this version
+            if gh pr list --head "$branch" --state open --json number --jq '.[0].number' 2>/dev/null | grep -q .; then
+              echo "Open PR already exists for ${name} ${latest}, skipping"
+              echo "::endgroup::"
+              continue
+            fi
+
+            # Bump the formula (write-only, no audit yet)
+            brew bump-formula-pr \
+              --write-only \
+              --no-audit \
+              --version="$latest" \
+              "$formula"
+
+            # If nothing changed (e.g. formula already at latest), skip
+            if git diff --quiet "Formula/${name}.rb"; then
+              echo "No changes for ${name} (already at ${latest}), skipping"
+              echo "::endgroup::"
+              continue
+            fi
+
+            # Commit, push, and open PR
+            git checkout -b "$branch"
+            git add "Formula/${name}.rb"
+            git commit -m "${name} ${latest}"
+            git push -u origin "$branch"
+
+            gh pr create \
+              --title "${name} ${latest}" \
+              --body "${name} ${current} → ${latest} (automated version bump by livecheck)"
+            echo "Created PR to bump ${name} from ${current} to ${latest}"
+
+            git checkout main
+            echo "::endgroup::"
+          done
