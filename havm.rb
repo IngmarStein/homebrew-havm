@@ -11,6 +11,7 @@ class Havm < Formula
   def install
     libexec.install "Havm.app"
     bin.install_symlink libexec/"Havm.app/Contents/MacOS/havm" => "havm"
+    generate_completions_from_executable(bin/"havm", "--generate-completion-script", shells: [:bash, :zsh, :fish])
   end
 
   service do
