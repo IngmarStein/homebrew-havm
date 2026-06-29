@@ -3,8 +3,9 @@
 Home Assistant OS VM for Apple Silicon using the native Virtualization framework.
 
 ```
-brew install IngmarStein/havm/havm
-brew services start havm
+brew tap IngmarStein/havm
+brew trust IngmarStein/havm
+brew install havm
 ```
 
 Requires macOS 27 (Golden Gate) with Apple Silicon.
