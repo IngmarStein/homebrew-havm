@@ -1,8 +1,8 @@
 class Havm < Formula
   desc "Zero-config Home Assistant OS VM runner for Apple Silicon"
   homepage "https://github.com/IngmarStein/havm"
-  url "https://github.com/IngmarStein/havm/releases/download/v0.1.3/havm.zip"
-  sha256 "215aee76554f28eb19cc63d263d23f9fb948d94da9a1954d1d450c0c7c1406a9"
+  url "https://github.com/IngmarStein/havm/releases/download/v0.1.4/havm.zip"
+  sha256 "56efbd12f585722f0df0ff468adcbc010e81406a9cb85657c5b4c9b8ac962ef7"
   license "MIT"
 
   depends_on macos: :golden_gate
