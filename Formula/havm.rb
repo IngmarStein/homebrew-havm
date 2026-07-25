@@ -21,14 +21,8 @@ class Havm < Formula
     working_dir var/"lib/havm"
     log_path var/"log/havm.log"
     error_log_path var/"log/havm.log"
+    stop_timeout 120
     environment_variables PATH: std_service_path_env
-  end
-
-  def post_install
-    plist = launchd_service_path
-    return unless plist.exist?
-
-    safe_system "plutil", "-replace", "ExitTimeout", "-integer", "120", plist.to_s
   end
 
   def caveats
