@@ -5,7 +5,7 @@ class Havm < Formula
   sha256 "f65de8777c255f9712805a3796e16978b8b5377f86a5270d9ba678d9eab7da15"
   license "MIT"
 
-  depends_on macos: :golden_gate
+  depends_on macos: :sequoia
   depends_on arch: :arm64
 
   def install
