@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## About
 
-This is a Homebrew **tap** (external formula repository) providing the `havm` formula — a zero-config Home Assistant OS VM runner for Apple Silicon using the native Virtualization framework. It requires macOS 27 (Golden Gate) on arm64.
+This is a Homebrew **tap** (external formula repository) providing the `havm` formula — a zero-config Home Assistant OS VM runner for Apple Silicon using the native Virtualization framework. It requires macOS 15 (Sequoia) on arm64; USB accessory passthrough needs macOS 27 at runtime.
 
 ## Key commands
 
@@ -25,12 +25,12 @@ The repo consists of a single Homebrew formula file (`havm.rb`) — the standard
 - **`Havm.app` bundle** is installed to `libexec/` (an `.app` in libexec prevents `brew` from auto-cd'ing into a single subdirectory). The CLI binary lives at `Havm.app/Contents/MacOS/havm`.
 - A **symlink** from `bin/havm` points into the app bundle so `havm` is on `PATH`.
 - The **`service` block** defines a launchd user service that runs `havm run -c <config> --data-dir <data>` in immediate keepalive mode.
-- **`post_install`** patches the generated launchd plist to set `ExitTimeout` to 120 seconds.
+- **`stop_timeout 120`** in the `service` block sets launchd's `ExitTimeOut`, giving Home Assistant OS up to two minutes to shut down cleanly.
 - **`caveats`** shows where data and optional config live (under `var/` and `etc/` respectively).
 
 ### Updating for a new release
 
-1. Update `version` to the new tag.
+1. Update `url` to the new release tag. The formula has no `version` stanza —
+   Homebrew derives the version from the url.
 2. Compute the new `sha256` with `shasum -a 256 havm.zip`.
-3. Update `url` if the download naming scheme changed.
-4. Run `brew audit` and `brew test-bot` as above.
+3. Run `brew audit` and `brew test-bot` as above.
