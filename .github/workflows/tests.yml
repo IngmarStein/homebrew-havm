@@ -1,0 +1,55 @@
+# `havm` installs a prebuilt app bundle from a GitHub release, so there is
+# nothing to compile and no bottle worth building. This validates the
+# formula instead of running `brew test-bot --only-formulae`, and there is
+# no `publish.yml` because the tap publishes no bottles.
+name: brew test-bot
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
+jobs:
+  test-bot:
+    runs-on: macos-26
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Homebrew Bundler RubyGems
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+          restore-keys: ${{ runner.os }}-rubygems-
+
+      - run: brew test-bot --only-cleanup-before
+
+      - run: brew test-bot --only-setup
+
+      - run: brew test-bot --only-tap-syntax
+
+      - name: Audit formula
+        if: github.event_name == 'pull_request'
+        run: brew audit --tap=ingmarstein/havm
+
+      - name: Install and test formula
+        if: github.event_name == 'pull_request'
+        run: |
+          brew install ingmarstein/havm/havm
+          brew test ingmarstein/havm/havm
