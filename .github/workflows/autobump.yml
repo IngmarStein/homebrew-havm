@@ -6,13 +6,18 @@ on:
     - cron: "0 */3 * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -euo pipefail {0}
 
 jobs:
   autobump:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
