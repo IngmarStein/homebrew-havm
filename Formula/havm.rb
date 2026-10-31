@@ -5,13 +5,13 @@ class Havm < Formula
   sha256 "c3e09f5d0e36f9a3e925bdd8401c0cec3d73284e62a1cfa044546e4429f72c28"
   license "MIT"
 
-  depends_on macos: :sequoia
   depends_on arch: :arm64
+  depends_on macos: :sequoia
 
   def install
     libexec.install "Havm.app"
     bin.install_symlink libexec/"Havm.app/Contents/MacOS/havm" => "havm"
-    generate_completions_from_executable(bin/"havm", "--generate-completion-script", shells: [:bash, :zsh, :fish])
+    generate_completions_from_executable(bin/"havm", "--generate-completion-script")
   end
 
   service do
