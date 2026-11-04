@@ -15,7 +15,7 @@ class Havm < Formula
   end
 
   service do
-    run [opt_bin/"havm", "run", "-c", etc/"havm/config.yml", "--data-dir", var/"lib/havm"]
+    run [opt_libexec/"Havm.app/Contents/MacOS/havm", "run", "-c", etc/"havm/config.yml", "--data-dir", var/"lib/havm"]
     keep_alive true
     run_type :immediate
     working_dir var/"lib/havm"
